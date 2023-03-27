@@ -8,12 +8,12 @@ use Twilio\Rest\Client;
 
 class PhoneNumberVerify extends Component
 {
-    public $code;
+    public $code = null;
     public $error;
 
     public function mount()
     {
-        $this->sendCode();
+        // $this->sendCode();
     }
 
     public function sendCode()
@@ -34,27 +34,28 @@ class PhoneNumberVerify extends Component
 
     public function verifyCode()
     {
-        $twilio = $this->connect();
-        try {
-            $verification_check = $twilio
-                ->verify
-                ->v2
-                ->services(getenv('TWILIO_VERIFICATION_SID'))
-                ->verificationChecks
-                ->create(
-                    $this->code, // code
-                    ["to" => '+1' . str_replace('-', '', $this->phone_number)]
-                );
-        } catch (\Exception $e) {
-            $this->error = $e->getMessage();
-        }
+        dd($this->code);
+        // $twilio = $this->connect();
+        // try {
+        //     $verification_check = $twilio
+        //         ->verify
+        //         ->v2
+        //         ->services(getenv('TWILIO_VERIFICATION_SID'))
+        //         ->verificationChecks
+        //         ->create(
+        //             $this->code, // code
+        //             ["to" => '+1' . str_replace('-', '', $this->phone_number)]
+        //         );
+        // } catch (\Exception $e) {
+        //     $this->error = $e->getMessage();
+        // }
 
-        if ($verification_check->valid == false) {
-            $this->error = 'That code is invalid, please try again.';
-        } else {
-            $this->error = '';
-            $this->status = $verification_check->status;
-        }
+        // if ($verification_check->valid == false) {
+        //     $this->error = 'That code is invalid, please try again.';
+        // } else {
+        //     $this->error = '';
+        //     $this->status = $verification_check->status;
+        // }
     }
 
     public function connect()
