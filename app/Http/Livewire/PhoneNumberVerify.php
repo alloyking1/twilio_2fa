@@ -2,42 +2,77 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\User;
 use Livewire\Component;
+use Twilio\Rest\Client;
+use Illuminate\Support\Facades\Auth;
+
 
 class PhoneNumberVerify extends Component
 {
-    public $code;
+    public $code = null;
+    public $error;
 
     public function mount()
     {
-        dd('I got here');
+        $this->sendCode();
     }
 
     public function sendCode()
     {
-        // $twilio = resolve('TwilioClient');
-        // $verification = $twilio
-        //     ->verify
-        //     ->v2
-        //     ->services(getenv('TWILIO_VERIFICATION_SID'))
-        //     ->verifications
-        //     ->create('+1' . str_replace('-', '', $this->phone_number), "sms");
-
-        // $this->status = $verification->status;
-        // dd($this->status);
-        $sid = getenv("TWILIO_ACCOUNT_SID");
-        $token = getenv("TWILIO_AUTH_TOKEN");
-        $twilio = new Client($sid, $token);
-
-        $verification = $twilio->verify->v2->services("VAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-            ->verifications
-            ->create("+15017122661", "sms");
-
-        dd($verification->status);
+        try {
+            $twilio = $this->connect();
+            $verification = $twilio->verify->v2->services(getenv("TWILIO_VERIFICATION_SID"))
+                ->verifications
+                ->create("+2348063146940", "sms");
+            session()->flash('message', 'OTP sent successfully');
+        } catch (\Exception $e) {
+            $this->error = $e->getMessage();
+        }
     }
 
     public function verifyCode()
     {
+        $twilio = $this->connect();
+        try {
+            $verification_check = $twilio
+                ->verify
+                ->v2
+                ->services(getenv('TWILIO_VERIFICATION_SID'))
+                ->verificationChecks
+                ->create(
+                    // ["to" => '+1' . str_replace('-', '', $this->phone_number)]
+                    [
+                        "to" => "+2348063146940",
+                        "code" => $this->code
+
+                    ]
+                );
+
+            User::where('id', Auth::user()->id)->update([
+                'phone_verified' => true
+            ]);
+
+            return redirect(route('dashboard'));
+        } catch (\Exception $e) {
+            $this->error = $e->getMessage();
+        }
+
+        if ($verification_check->valid == false) {
+            $this->error = 'That code is invalid, please try again.';
+            session()->flash('error', $this->error);
+        } else {
+            $this->error = '';
+            $this->status = $verification_check->status;
+        }
+    }
+
+    public function connect()
+    {
+        $sid = getenv("TWILIO_ACCOUNT_SID");
+        $token = getenv("TWILIO_AUTH_TOKEN");
+        $twilio = new Client($sid, $token);
+        return $twilio;
     }
 
     public function render()
