@@ -2,8 +2,10 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\User;
 use Livewire\Component;
 use Twilio\Rest\Client;
+use Illuminate\Support\Facades\Auth;
 
 
 class PhoneNumberVerify extends Component
@@ -13,20 +15,17 @@ class PhoneNumberVerify extends Component
 
     public function mount()
     {
-        // $this->sendCode();
+        $this->sendCode();
     }
 
     public function sendCode()
     {
         try {
-            // $twilio = $this->connect();
-            // $verification = $twilio->verify->v2->services(getenv("TWILIO_VERIFICATION_SID"))
-            //     ->verifications
-            //     ->create("+2348063146940", "sms");
-            true;
+            $twilio = $this->connect();
+            $verification = $twilio->verify->v2->services(getenv("TWILIO_VERIFICATION_SID"))
+                ->verifications
+                ->create("+2348063146940", "sms");
             session()->flash('message', 'OTP sent successfully');
-
-            // dd($verification->status);
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
         }
@@ -34,28 +33,38 @@ class PhoneNumberVerify extends Component
 
     public function verifyCode()
     {
-        dd($this->code);
-        // $twilio = $this->connect();
-        // try {
-        //     $verification_check = $twilio
-        //         ->verify
-        //         ->v2
-        //         ->services(getenv('TWILIO_VERIFICATION_SID'))
-        //         ->verificationChecks
-        //         ->create(
-        //             $this->code, // code
-        //             ["to" => '+1' . str_replace('-', '', $this->phone_number)]
-        //         );
-        // } catch (\Exception $e) {
-        //     $this->error = $e->getMessage();
-        // }
+        $twilio = $this->connect();
+        try {
+            $verification_check = $twilio
+                ->verify
+                ->v2
+                ->services(getenv('TWILIO_VERIFICATION_SID'))
+                ->verificationChecks
+                ->create(
+                    // ["to" => '+1' . str_replace('-', '', $this->phone_number)]
+                    [
+                        "to" => "+2348063146940",
+                        "code" => $this->code
 
-        // if ($verification_check->valid == false) {
-        //     $this->error = 'That code is invalid, please try again.';
-        // } else {
-        //     $this->error = '';
-        //     $this->status = $verification_check->status;
-        // }
+                    ]
+                );
+
+            User::where('id', Auth::user()->id)->update([
+                'phone_verified' => true
+            ]);
+
+            return redirect(route('dashboard'));
+        } catch (\Exception $e) {
+            $this->error = $e->getMessage();
+        }
+
+        if ($verification_check->valid == false) {
+            $this->error = 'That code is invalid, please try again.';
+            session()->flash('error', $this->error);
+        } else {
+            $this->error = '';
+            $this->status = $verification_check->status;
+        }
     }
 
     public function connect()
