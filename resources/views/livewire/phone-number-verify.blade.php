@@ -16,8 +16,11 @@
         <div class="flex items-center justify-end mt-4">
 
             <x-primary-button class="ml-3">
-                {{ __('Send code') }}
+                {{ __('Verify code') }}
             </x-primary-button>
         </div>
     </form>
+    {{-- <x-primary-button class="ml-3">
+        {{ __('Re-send code') }}
+    </x-primary-button> --}}
 </x-guest-layout>
