@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+
+use App\Http\Livewire\PhoneNumberVerify;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,7 +32,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::prefix('/verify')->group(function () {
-    Route::view('/phone', 'livewire.phone-number-verify')->name('verify.phone');
+    Route::get('/phone', PhoneNumberVerify::class)->name('verify.phone');
+
     // Route::livewire('verify', 'verify-api');
 });
 
