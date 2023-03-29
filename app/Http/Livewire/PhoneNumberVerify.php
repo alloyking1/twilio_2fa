@@ -24,7 +24,7 @@ class PhoneNumberVerify extends Component
             $twilio = $this->connect();
             $verification = $twilio->verify->v2->services(getenv("TWILIO_VERIFICATION_SID"))
                 ->verifications
-                ->create("+2348063146940", "sms");
+                ->create("+234" . str_replace('-', '', Auth::user()->phone_number), "sms");
             session()->flash('message', 'OTP sent successfully');
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
@@ -41,9 +41,8 @@ class PhoneNumberVerify extends Component
                 ->services(getenv('TWILIO_VERIFICATION_SID'))
                 ->verificationChecks
                 ->create(
-                    // ["to" => '+1' . str_replace('-', '', $this->phone_number)]
                     [
-                        "to" => "+2348063146940",
+                        "to" => "+234" . str_replace('-', '', Auth::user()->phone_number),
                         "code" => $this->code
 
                     ]
