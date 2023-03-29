@@ -33,8 +33,6 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('/verify')->group(function () {
     Route::get('/phone', PhoneNumberVerify::class)->name('verify.phone');
-
-    // Route::livewire('verify', 'verify-api');
 });
 
 require __DIR__ . '/auth.php';
