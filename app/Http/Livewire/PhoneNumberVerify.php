@@ -15,7 +15,7 @@ class PhoneNumberVerify extends Component
 
     public function mount()
     {
-        $this->sendCode();
+        // $this->sendCode();
     }
 
     public function sendCode()
@@ -35,7 +35,7 @@ class PhoneNumberVerify extends Component
     {
         $twilio = $this->connect();
         try {
-            $verification_check = $twilio
+            $check_code = $twilio
                 ->verify
                 ->v2
                 ->services(getenv('TWILIO_VERIFICATION_SID'))
@@ -48,21 +48,18 @@ class PhoneNumberVerify extends Component
                     ]
                 );
 
-            User::where('id', Auth::user()->id)->update([
-                'phone_verified' => true
-            ]);
+            if ($check_code->valid == true) {
+                User::where('id', Auth::user()->id)->update([
+                    'phone_verified' => $check_code->valid
+                ]);
 
-            return redirect(route('dashboard'));
+                return redirect(route('dashboard'));
+            } else {
+                session()->flash('error', 'Verification failed, Invalid code.');
+            }
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
-        }
-
-        if ($verification_check->valid == false) {
-            $this->error = 'That code is invalid, please try again.';
             session()->flash('error', $this->error);
-        } else {
-            $this->error = '';
-            $this->status = $verification_check->status;
         }
     }
 

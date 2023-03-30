@@ -1,6 +1,11 @@
 
-<div class="max-4xl mx-auto px-8 mt-20 md:px-24">
-    <x-auth-session-status class="mb-4" :status="session('message')" />
+<div class="p-6">
+    @if (session()->has('error'))
+        <x-auth-session-status class="mb-4 bg-red-500 text-white" :status="session('error')" />
+    @elseif(session()->has('message'))
+        <x-auth-session-status class="mb-4 bg-green-500 text-white" :status="session('message')" />
+    @endif
+   
     <div class="bg-gray-200 p-10">
         <form wire:submit.prevent="verifyCode">
     
