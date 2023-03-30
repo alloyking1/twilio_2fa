@@ -15,7 +15,7 @@ class PhoneNumberVerify extends Component
 
     public function mount()
     {
-        // $this->sendCode();
+        $this->sendCode();
     }
 
     public function sendCode()
@@ -25,7 +25,9 @@ class PhoneNumberVerify extends Component
             $verification = $twilio->verify->v2->services(getenv("TWILIO_VERIFICATION_SID"))
                 ->verifications
                 ->create("+234" . str_replace('-', '', Auth::user()->phone_number), "sms");
-            session()->flash('message', 'OTP sent successfully');
+            if ($verification->status === "pending") {
+                session()->flash('message', 'OTP sent successfully');
+            }
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
         }

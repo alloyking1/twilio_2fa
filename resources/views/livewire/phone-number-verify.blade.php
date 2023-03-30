@@ -5,7 +5,7 @@
     @elseif(session()->has('message'))
         <x-auth-session-status class="mb-4 bg-green-500 text-white" :status="session('message')" />
     @endif
-   
+
     <div class="bg-gray-200 p-10">
         <form wire:submit.prevent="verifyCode">
     
